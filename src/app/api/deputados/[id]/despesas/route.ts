@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+
 const API_URL = "https://dadosabertos.camara.leg.br/api/v2";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   const searchParams = request.nextUrl.searchParams;
   const ano = searchParams.get("ano");
   const mes = searchParams.get("mes");
-  const id = params.id;
+  const id = context.params.id;
 
   if (!ano || !mes) {
     return NextResponse.json(
