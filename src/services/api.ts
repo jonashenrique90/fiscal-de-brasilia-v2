@@ -1,5 +1,3 @@
-const API_URL = "https://dadosabertos.camara.leg.br/api/v2";
-
 interface Gabinete {
   nome: string;
   predio: string;
@@ -46,6 +44,7 @@ export interface DeputadoDetalhado {
   ufNascimento: string;
   municipioNascimento: string;
   escolaridade: string | null;
+  redeSocial: string[];
 }
 
 export interface Despesa {
@@ -79,9 +78,7 @@ export interface DespesaPorTipo {
 }
 
 export async function searchDeputados(nome: string): Promise<Deputado[]> {
-  const response = await fetch(
-    `${API_URL}/deputados?nome=${nome}&ordem=ASC&ordenarPor=nome`
-  );
+  const response = await fetch(`/api/deputados?nome=${nome}`);
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -103,7 +100,7 @@ export async function searchDeputados(nome: string): Promise<Deputado[]> {
 }
 
 export async function getDeputado(id: number): Promise<DeputadoDetalhado> {
-  const response = await fetch(`${API_URL}/deputados/${id}`);
+  const response = await fetch(`/api/deputados/${id}`);
   const data = await response.json();
   return data.dados;
 }
@@ -111,22 +108,27 @@ export async function getDeputado(id: number): Promise<DeputadoDetalhado> {
 export async function getDespesas(id: number, ano: number): Promise<Despesa[]> {
   const anoAtual = new Date().getFullYear();
   const mesAtual = ano === anoAtual ? new Date().getMonth() + 1 : 12;
+
+  const promises = Array.from({ length: mesAtual }, (_, index) => {
+    const mes = index + 1;
+    return fetch(`/api/deputados/${id}/despesas?ano=${ano}&mes=${mes}`).then(
+      (response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      }
+    );
+  });
+
+  const results = await Promise.allSettled(promises);
   const todasDespesas: Despesa[] = [];
 
-  for (let mes = 1; mes <= mesAtual; mes++) {
-    const response = await fetch(
-      `${API_URL}/deputados/${id}/despesas?ano=${ano}&mes=${mes}&itens=1000&ordem=DESC&ordenarPor=dataDocumento`
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+  results.forEach((result) => {
+    if (result.status === "fulfilled" && result.value.dados) {
+      todasDespesas.push(...result.value.dados);
     }
-
-    const data = await response.json();
-    if (data.dados) {
-      todasDespesas.push(...data.dados);
-    }
-  }
+  });
 
   return todasDespesas;
 }

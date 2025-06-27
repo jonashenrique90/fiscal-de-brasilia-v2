@@ -8,7 +8,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Fiscal de Brasília",
-  description: "Aplicação para fiscalização de obras em Brasília",
+  description:
+    "Aplicação para fiscalização de gastos dos deputados em Brasília",
 };
 
 export default function RootLayout({

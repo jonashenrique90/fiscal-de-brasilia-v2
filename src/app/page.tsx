@@ -1,120 +1,66 @@
 "use client";
 
-import { useState } from "react";
-import { Deputado, searchDeputados } from "@/services/api";
+import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [deputados, setDeputados] = useState<Deputado[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchTerm.trim()) return;
-
-    setIsLoading(true);
-    setError("");
-    setDeputados([]);
-
-    try {
-      const results = await searchDeputados(searchTerm);
-      if (results.length === 0) {
-        setError("Nenhum deputado encontrado com esse nome.");
-      } else {
-        setDeputados(results);
-      }
-    } catch (err) {
-      console.error("Erro na busca:", err);
-      setError("Erro ao buscar deputados. Por favor, tente novamente.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleSearch}>
-            <div className="flex flex-col space-y-2">
-              <label
-                htmlFor="search"
-                className="text-lg font-medium text-primary-dark"
-              >
-                Pesquisar Deputado
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="search"
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Digite o nome do deputado..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white text-gray-900 placeholder:text-gray-500"
-                />
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark transition-colors whitespace-nowrap font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? "Buscando..." : "Pesquisar"}
-                </button>
-              </div>
-            </div>
-          </form>
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-6">
+            Fiscal de Brasília
+          </h1>
+          <p className="text-xl text-gray-600 mb-12">
+            Acompanhe as atividades dos deputados federais, suas votações e
+            despesas
+          </p>
 
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          {deputados.length > 0 && (
-            <div className="mt-8 space-y-4">
-              {deputados.map((deputado) => (
-                <div
-                  key={deputado.id}
-                  onClick={() => router.push(`/deputados/${deputado.id}`)}
-                  className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-[1.02] p-4 cursor-pointer"
-                >
-                  <div className="flex gap-6">
-                    <div className="w-32 h-40 relative flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                      {deputado.urlFoto && (
-                        <Image
-                          src={deputado.urlFoto}
-                          alt={deputado.nome}
-                          fill
-                          sizes="128px"
-                          className="object-cover"
-                          priority
-                        />
-                      )}
-                    </div>
-                    <div className="flex flex-col justify-center">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {deputado.nome}
-                      </h3>
-                      <div className="flex items-center">
-                        <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                          {deputado.siglaPartido} - {deputado.siglaUf}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link
+              href="/deputados"
+              className="group bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300"
+            >
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 mb-4 relative">
+                  <Image
+                    src="/file.svg"
+                    alt="Deputados"
+                    fill
+                    className="object-contain"
+                  />
                 </div>
-              ))}
-            </div>
-          )}
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors">
+                  Deputados
+                </h2>
+                <p className="text-gray-600">
+                  Pesquise e acompanhe os deputados federais
+                </p>
+              </div>
+            </Link>
 
-          {!isLoading && searchTerm && deputados.length === 0 && !error && (
-            <div className="mt-4 text-center text-gray-500">
-              Nenhum deputado encontrado com esse nome.
-            </div>
-          )}
+            <Link
+              href="/votacoes"
+              className="group bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300"
+            >
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 mb-4 relative">
+                  <Image
+                    src="/window.svg"
+                    alt="Votações"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors">
+                  Votações
+                </h2>
+                <p className="text-gray-600">
+                  Acompanhe as votações na Câmara dos Deputados
+                </p>
+              </div>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

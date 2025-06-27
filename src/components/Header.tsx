@@ -14,7 +14,19 @@ export function Header() {
             </Link>
           </div>
 
-          <nav className="flex items-center space-x-4">
+          <nav className="flex items-center space-x-6">
+            <Link
+              href="/deputados"
+              className="text-white/80 hover:text-white transition-colors"
+            >
+              Deputados
+            </Link>
+            <Link
+              href="/votacoes"
+              className="text-white/80 hover:text-white transition-colors"
+            >
+              Votações
+            </Link>
             <Link
               href="https://github.com/jonasaacampos/fiscal-de-brasilia-v2"
               target="_blank"
