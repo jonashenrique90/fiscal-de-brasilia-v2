@@ -1,103 +1,122 @@
+"use client";
+
+import { useState } from "react";
+import { Deputado, searchDeputados } from "@/services/api";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [deputados, setDeputados] = useState<Deputado[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchTerm.trim()) return;
+
+    setIsLoading(true);
+    setError("");
+    setDeputados([]);
+
+    try {
+      const results = await searchDeputados(searchTerm);
+      if (results.length === 0) {
+        setError("Nenhum deputado encontrado com esse nome.");
+      } else {
+        setDeputados(results);
+      }
+    } catch (err) {
+      console.error("Erro na busca:", err);
+      setError("Erro ao buscar deputados. Por favor, tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <form onSubmit={handleSearch}>
+            <div className="flex flex-col space-y-2">
+              <label
+                htmlFor="search"
+                className="text-lg font-medium text-primary-dark"
+              >
+                Pesquisar Deputado
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="search"
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Digite o nome do deputado..."
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-white text-gray-900 placeholder:text-gray-500"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-6 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark transition-colors whitespace-nowrap font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? "Buscando..." : "Pesquisar"}
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {deputados.length > 0 && (
+            <div className="mt-8 space-y-4">
+              {deputados.map((deputado) => (
+                <div
+                  key={deputado.id}
+                  onClick={() => router.push(`/deputados/${deputado.id}`)}
+                  className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-[1.02] p-4 cursor-pointer"
+                >
+                  <div className="flex gap-6">
+                    <div className="w-32 h-40 relative flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                      {deputado.urlFoto && (
+                        <Image
+                          src={deputado.urlFoto}
+                          alt={deputado.nome}
+                          fill
+                          sizes="128px"
+                          className="object-cover"
+                          priority
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        {deputado.nome}
+                      </h3>
+                      <div className="flex items-center">
+                        <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                          {deputado.siglaPartido} - {deputado.siglaUf}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!isLoading && searchTerm && deputados.length === 0 && !error && (
+            <div className="mt-4 text-center text-gray-500">
+              Nenhum deputado encontrado com esse nome.
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
