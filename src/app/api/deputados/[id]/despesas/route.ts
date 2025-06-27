@@ -1,14 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 
 // Tipagem inline compatível com App Router
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, context: any) {
   const searchParams = request.nextUrl.searchParams;
   const ano = searchParams.get("ano");
   const mes = searchParams.get("mes");
-  const id = params.id;
+  const id = context.params.id;
   const url = process.env.NEXT_PUBLIC_API_URL;
 
   if (!ano || !mes) {
