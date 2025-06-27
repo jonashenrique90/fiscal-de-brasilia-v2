@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-git;
 const API_URL = "https://dadosabertos.camara.leg.br/api/v2";
 
 export async function GET(
