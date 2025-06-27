@@ -1,12 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 
 const API_URL = "https://dadosabertos.camara.leg.br/api/v2";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const id = params.id;
+export async function GET(request: Request, context: any) {
+  const id = context.params.id;
 
   try {
     const response = await fetch(`${API_URL}/deputados/${id}`);
