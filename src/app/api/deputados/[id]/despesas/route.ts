@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 
+const API_URL = "https://dadosabertos.camara.leg.br/api/v2";
+
 // Tipagem inline compatível com App Router
 export async function GET(request: NextRequest, context: any) {
   const searchParams = request.nextUrl.searchParams;
   const ano = searchParams.get("ano");
   const mes = searchParams.get("mes");
   const id = context.params.id;
-  const url = process.env.NEXT_PUBLIC_API_URL;
 
   if (!ano || !mes) {
     return NextResponse.json(
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest, context: any) {
 
   try {
     const response = await fetch(
-      `${url}/deputados/${id}/despesas?ano=${ano}&mes=${mes}&itens=100&ordem=DESC&ordenarPor=dataDocumento`
+      `${API_URL}/deputados/${id}/despesas?ano=${ano}&mes=${mes}&itens=100&ordem=DESC&ordenarPor=dataDocumento`
     );
 
     if (!response.ok) {

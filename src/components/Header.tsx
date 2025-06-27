@@ -28,7 +28,7 @@ export function Header() {
               Votações
             </Link>
             <Link
-              href="https://github.com/jonasaacampos/fiscal-de-brasilia-v2"
+              href="https://github.com/jonashenrique90/fiscal-de-brasilia-v2"
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/80 hover:text-white transition-colors"
